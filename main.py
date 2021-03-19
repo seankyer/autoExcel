@@ -6,13 +6,35 @@
 import os
 import sys
 import xlsxwriter
+import random
+from PySide6 import QtCore, QtWidgets, QtGui
+
+
+# Qt GUI
+class MyWidget(QtWidgets.QWidget):
+    def __init__(self):
+        super().__init__()
+
+        self.home_path = os.path.join(os.environ["HOMEPATH"], "Desktop")
+        self.textEdit = QtWidgets.QLineEdit("C:\\Users\\seana\\Desktop")
+        self.instructionForTextEdit = QtWidgets.QLabel("Enter Desired Save Path")
+        self.button = QtWidgets.QPushButton("Generate Excel Sheet!")
+        self.text = QtWidgets.QLabel("Auto Excel", alignment=QtCore.Qt.AlignCenter)
+
+        self.layout = QtWidgets.QVBoxLayout(self)
+        self.layout.addWidget(self.instructionForTextEdit)
+        self.layout.addWidget(self.textEdit)
+        self.layout.addWidget(self.text)
+        self.layout.addWidget(self.button)
+
+        self.button.clicked.connect(build_excel())
 
 
 # Builds the excel sheet
 # Args:
 # Outputs: xlsx file to designated directory.
 def build_excel():
-    workbook = xlsxwriter.Workbook("C:/Users/seana/Desktop/test.xlsx")  # test directory
+    workbook = xlsxwriter.Workbook("C:\\Users\\seana\\Desktop")  # test directory
     worksheet = workbook.add_worksheet()
 
     # Style Stuff:
@@ -36,4 +58,10 @@ def build_excel():
 
 if __name__ == '__main__':
     print("Launching Excel Writer")
-    build_excel()
+    app = QtWidgets.QApplication([])
+
+    widget = MyWidget()
+    widget.resize(800, 600)
+    widget.show()
+
+    sys.exit(app.exec_())
