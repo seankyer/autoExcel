@@ -1,5 +1,5 @@
 # Script by Sean Kyer github.com/seankyer
-# Version 0.0.1 2021-03-18
+# Version 0.0.3 2021-03-19
 # Project Description:
 #     Create fields for users to input variable data and have Python input it directly into generated excel file
 
