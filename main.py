@@ -1,7 +1,13 @@
-# Script by Sean Kyer github.com/seankyer
-# Version 0.0.3 2021-03-19
+# Script by Sean Kyer https://github.com/seankyer/autoExcel
+# Version 0.1.3 2021-03-19
 # Project Description:
-#     Create fields for users to input variable data and have Python input it directly into generated excel file
+#   Assist user in creating tediously repetitive excel sheets where data repeats but is also variable. A user will
+#   input their prefix and suffix, along with desired repetitions and when there should be variably scaling data.
+#
+#   An example would be if you need to create a job that has name tags for products with unique identifiers but also
+#   common names. AH-1 -> AH-99 would need to be created in a spread sheet. For the same job, BH-5 -> BH 509 must be
+#   created. Instead of manually entering or "dragging" with excel, you can input your list of variations and python
+#   will construct the excel sheet for you. Saving potentially 15-35 minutes per job.
 
 import os
 import sys
@@ -59,10 +65,11 @@ def build_excel(save_path):
     worksheet.write(3, 0, 123.456)
 
     workbook.close()
+    print("Excel file generated at " + save_path)
 
 
 if __name__ == '__main__':
-    print("Launching Excel Writer")
+    print("Launching Auto Excel")
     app = QtWidgets.QApplication([])
 
     widget = MyWidget()
