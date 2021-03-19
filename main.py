@@ -6,7 +6,6 @@
 import os
 import sys
 import xlsxwriter
-import random
 from PySide6 import QtCore, QtWidgets, QtGui
 
 
@@ -16,25 +15,31 @@ class MyWidget(QtWidgets.QWidget):
         super().__init__()
 
         self.home_path = os.path.join(os.environ["HOMEPATH"], "Desktop")
-        self.textEdit = QtWidgets.QLineEdit("C:\\Users\\seana\\Desktop")
-        self.instructionForTextEdit = QtWidgets.QLabel("Enter Desired Save Path")
+        self.file_path_entry = QtWidgets.QLineEdit(self.home_path)
+        self.file_name_entry = QtWidgets.QLineEdit("test.xlsx")
+        self.instruction_text = QtWidgets.QLabel("Enter Desired Save Path")
         self.button = QtWidgets.QPushButton("Generate Excel Sheet!")
-        self.text = QtWidgets.QLabel("Auto Excel", alignment=QtCore.Qt.AlignCenter)
 
         self.layout = QtWidgets.QVBoxLayout(self)
-        self.layout.addWidget(self.instructionForTextEdit)
-        self.layout.addWidget(self.textEdit)
-        self.layout.addWidget(self.text)
+        self.layout.addWidget(self.instruction_text)
+        self.layout.addWidget(self.file_path_entry)
+        self.layout.addWidget(self.file_name_entry)
         self.layout.addWidget(self.button)
 
-        self.button.clicked.connect(build_excel())
+        # Save path specified by user
+        self.savePath = os.path.join(self.file_path_entry.text(), self.file_name_entry.text())
+
+        # Call to build_excel
+        self.button.clicked.connect(build_excel(self.savePath))
 
 
 # Builds the excel sheet
 # Args:
-# Outputs: xlsx file to designated directory.
-def build_excel():
-    workbook = xlsxwriter.Workbook("C:\\Users\\seana\\Desktop")  # test directory
+#   save_path: The filepath, including name of file and .xlsx suffix
+# Outputs:
+#   xlsx file to designated directory.
+def build_excel(save_path):
+    workbook = xlsxwriter.Workbook(save_path)  # test directory
     worksheet = workbook.add_worksheet()
 
     # Style Stuff:
