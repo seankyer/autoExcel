@@ -24,53 +24,48 @@ class MyWidget(QtWidgets.QWidget):
         self.file_path_entry = QtWidgets.QLineEdit(self.home_path)
         self.file_name_entry = QtWidgets.QLineEdit("test.xlsx")
         self.instruction_text = QtWidgets.QLabel("Enter Desired Save Path")
-        self.button = QtWidgets.QPushButton("Generate Excel Sheet!")
+        self.excel_button = QtWidgets.QPushButton("Generate Excel Sheet!")
 
         self.layout = QtWidgets.QVBoxLayout(self)
         self.layout.addWidget(self.instruction_text)
         self.layout.addWidget(self.file_path_entry)
         self.layout.addWidget(self.file_name_entry)
-        self.layout.addWidget(self.button)
+        self.layout.addWidget(self.excel_button)
 
+        # Variable Information for build_excel
         # Save path specified by user
-        self.savePath = os.path.join(self.file_path_entry.text(), self.file_name_entry.text())
+        self.save_path = os.path.join(self.file_path_entry.text(), self.file_name_entry.text())
 
         # Call to build_excel
-        self.button.clicked.connect(build_excel(self.savePath))
+        self.excel_button.clicked.connect(self.build_excel)  # TODO: This is calling build_excel prematurely
 
+    def build_excel(self):
+        workbook = xlsxwriter.Workbook(self.save_path)  # test directory
+        worksheet = workbook.add_worksheet()
 
-# Builds the excel sheet
-# Args:
-#   save_path: The filepath, including name of file and .xlsx suffix
-# Outputs:
-#   xlsx file to designated directory.
-def build_excel(save_path):
-    workbook = xlsxwriter.Workbook(save_path)  # test directory
-    worksheet = workbook.add_worksheet()
+        # Style Stuff:
+        bold = workbook.add_format({'bold': True})  # Adds bold specification
+        worksheet.set_column('A:A', 20)  # Widens first column
 
-    # Style Stuff:
-    bold = workbook.add_format({'bold': True})  # Adds bold specification
-    worksheet.set_column('A:A', 20)  # Widens first column
+        # Add a bold format to use to highlight cells.
 
-    # Add a bold format to use to highlight cells.
+        # Write some simple text.
+        worksheet.write('A1', 'Hello')
 
-    # Write some simple text.
-    worksheet.write('A1', 'Hello')
+        # Text with formatting.
+        worksheet.write('A2', 'World', bold)
 
-    # Text with formatting.
-    worksheet.write('A2', 'World', bold)
+        # Write some numbers, with row/column notation.
+        worksheet.write(2, 0, 123)
+        worksheet.write(3, 0, 123.456)
 
-    # Write some numbers, with row/column notation.
-    worksheet.write(2, 0, 123)
-    worksheet.write(3, 0, 123.456)
-
-    workbook.close()
-    print("Excel file generated at " + save_path)
+        workbook.close()
+        print("Excel file generated at " + self.save_path)
 
 
 if __name__ == '__main__':
     print("Launching Auto Excel")
-    app = QtWidgets.QApplication([])
+    app = QtWidgets.QApplication(sys.argv)
 
     widget = MyWidget()
     widget.resize(800, 600)
