@@ -1,8 +1,8 @@
 # Script by Sean Kyer https://github.com/seankyer/autoExcel
-# Version 0.1.4 2021-03-20
+# Version 1.0.0 2021-03-24
 # Project Description:
-#   Assist user in creating tediously repetitive excel sheets where data repeats but is also variable. A user will
-#   input their prefix and suffix, along with desired repetitions and when there should be variably scaling data.
+#   Assist user in creating tediously repetitive excel sheets where data repeats, but is also variable. A user will
+#   input their prefix and suffix, along with desired repetition range.
 #
 #   An example would be if you need to create a job that has name tags for products with unique identifiers but also
 #   common names. AH-1 -> AH-99 would need to be created in a spread sheet. For the same job, BH-5 -> BH 509 must be
@@ -20,7 +20,17 @@ import sys
 import xlsxwriter
 from PyQt5 import QtCore, QtGui, QtWidgets
 
+EXECUTION_LIST = []
 
+
+class ExcelItem:
+    def __init__(self, prefix="", min_max=[], suffix=""):
+        self.prefix = prefix
+        self.min_max = min_max
+        self.suffix = suffix
+
+
+# Initial setup of GUI
 class ui_dialog(object):
     def setupUi(self, dialog):
         dialog.setObjectName("Dialog")
@@ -116,6 +126,7 @@ class ui_dialog(object):
         self.retranslateUi(dialog)
         QtCore.QMetaObject.connectSlotsByName(dialog)
 
+    # More GUI setup, setting texts and linking functions
     def retranslateUi(self, Dialog):
         _translate = QtCore.QCoreApplication.translate
         Dialog.setWindowTitle(_translate("Dialog", "Auto Excel"))
@@ -138,71 +149,82 @@ class ui_dialog(object):
         # Function Hookup
         self.file_path_entry.textChanged.connect(self.update_filepath)
         self.file_name_entry.textChanged.connect(self.update_filepath)
+        self.add_input_button.clicked.connect(self.add_input)
+        self.remove_selection_button.clicked.connect(self.remove_item)
+        self.clear_button.clicked.connect(self.clear_input)
         self.generate_excel_button.clicked.connect(self.generate_excel)
 
+    # Backend of script:
+
+    # After checking base case parameters, builds sheet. If an error is found, post error message
     def generate_excel(self):
+        if not EXECUTION_LIST:
+            self.error_info_label.setText("No items to build!")
+            return
+        if os.path.isfile(self.save_path):
+            self.error_info_label.setText("Error: File name already exists!")
+            return
+        if not self.file_name_entry.text().endswith(".xlsx"):
+            self.error_info_label.setText("Ensure file name ends with '.xlsx'")
+            return
+        if not os.path.isdir(self.file_path_entry.text()):
+            self.error_info_label.setText("File Path is invalid")
+            return
         if os.path.isdir(self.file_path_entry.text()) and self.file_name_entry.text().endswith(".xlsx"):
             self.error_info_label.setText("")
             self.build_excel()
-        elif not self.file_name_entry.text().endswith(".xlsx"):
-            self.error_info_label.setText("Ensure file name ends with '.xlsx'")
-        elif not os.path.isdir(self.file_path_entry.text()):
-            self.error_info_label.setText("File Path is invalid")
 
+    # Called every key-stroke when editing file_path_entry or file_name_entry
     def update_filepath(self):
         self.save_path = os.path.join(self.file_path_entry.text(), self.file_name_entry.text())
         self.path_name_label.setText(self.save_path)
 
+    # Sets inputs to default values for new object
+    def clear_input(self):
+        self.suffix_entry.setText("")
+        self.prefix_entry.setText("")
+        self.max_spinBox.setValue(1)
+        self.min_spinBox.setValue(1)
+
+    # Adds the specified input to the back of EXECUTION_LIST and to the back of list_of_executions
+    def add_input(self):
+        if self.min_spinBox.value() > self.max_spinBox.value():
+            self.error_info_label.setText("Error: Range start must be less than range end!")
+            return
+        prefix = self.prefix_entry.text()
+        min_max = list(range(self.min_spinBox.value(), self.max_spinBox.value() + 1))
+        suffix = self.suffix_entry.text()
+        item = ExcelItem(prefix, min_max, suffix)
+        EXECUTION_LIST.append(item)
+        item_name = (item.prefix + str(item.min_max[0]) + "-" + str(item.min_max[len(item.min_max) - 1]) + item.suffix)
+        self.list_of_executions.addItem(item_name)
+
+    # Removes selected item by index from list_of_executions and by same index from EXECUTION_LIST
+    def remove_item(self):
+        index = self.list_of_executions.row(self.list_of_executions.selectedItems()[0])
+        self.list_of_executions.takeItem(self.list_of_executions.row(self.list_of_executions.selectedItems()[0]))
+        EXECUTION_LIST.pop(index)
+
+    # Loops through EXECUTION_LIST, each item found increases column. For each given item, the item is repeated built as
+    # many times as is specified by the min_max, increasing row each iteration
     def build_excel(self):
+
         workbook = xlsxwriter.Workbook(self.save_path)  # test directory
         worksheet = workbook.add_worksheet()
 
-        # Style Stuff:
-        bold = workbook.add_format({'bold': True})  # Adds bold specification
-        worksheet.set_column('A:A', 20)  # Widens first column
+        column = -1
 
-        # Add a bold format to use to highlight cells.
-
-        # Write some simple text.
-        worksheet.write('A1', 'Hello')
-
-        # Text with formatting.
-        worksheet.write('A2', 'World', bold)
-
-        # Write some numbers, with row/column notation.
-        worksheet.write(2, 0, 123)
-        worksheet.write(3, 0, 123.456)
+        for item in EXECUTION_LIST:
+            column = column + 1
+            row = 0
+            for count in range(item.min_max[0], item.min_max[len(item.min_max) - 1] + 1):
+                text = item.prefix + str(count) + item.suffix
+                worksheet.write(row, column, text)
+                row = row + 1
 
         workbook.close()
         print("Excel file generated at " + self.save_path)
 
-
-# Qt GUI
-'''
-class MyWidget(QtWidgets.QWidget):
-    def __init__(self):
-        super().__init__()
-        self.setFixedSize(800, 600)
-
-        self.home_path = os.path.join(os.environ["HOMEPATH"], "Desktop")
-        self.file_path_entry = QtWidgets.QLineEdit(self.home_path)
-        self.file_name_entry = QtWidgets.QLineEdit("test.xlsx")
-        self.instruction_text = QtWidgets.QLabel("Enter Desired Save Path")
-        self.excel_button = QtWidgets.QPushButton("Generate Excel Sheet!")
-
-        self.background = QtWidgets.QVBoxLayout(self)
-        self.background.addWidget(self.instruction_text)
-        self.background.addWidget(self.file_path_entry)
-        self.background.addWidget(self.file_name_entry)
-        self.background.addWidget(self.excel_button)
-
-        # Variable Information for build_excel
-        # Save path specified by user
-        self.save_path = os.path.join(self.file_path_entry.text(), self.file_name_entry.text())
-
-        # Call to build_excel
-        self.excel_button.clicked.connect(self.build_excel)  # TODO: This is calling build_excel prematurely
-'''
 
 if __name__ == '__main__':
     print("Launching Auto Excel")
