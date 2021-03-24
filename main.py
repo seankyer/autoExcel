@@ -6,7 +6,7 @@
 #
 #   An example would be if you need to create a job that has name tags for products with unique identifiers but also
 #   common names. AH-1 -> AH-99 would need to be created in a spread sheet. For the same job, BH-5 -> BH 509 must be
-#   created. Instead of manually entering or "dragging" with excel, you can input your list of variations and python
+#   created. Instead of manually entering or 'with excel', you can input your list of variations and python
 #   will construct the excel sheet for you. Saving potentially 15-35 minutes per job.
 
 # To update UI:
