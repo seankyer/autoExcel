@@ -103,13 +103,13 @@ class ui_dialog(object):
         self.suffix_label.setFont(font)
         self.suffix_label.setObjectName("suffix_label")
         self.remove_selection_button = QtWidgets.QPushButton(dialog)
-        self.remove_selection_button.setGeometry(QtCore.QRect(244, 310, 111, 24))
+        self.remove_selection_button.setGeometry(QtCore.QRect(228, 310, 140, 24))
         self.remove_selection_button.setObjectName("remove_selection_button")
         self.clear_button = QtWidgets.QPushButton(dialog)
-        self.clear_button.setGeometry(QtCore.QRect(100, 400, 75, 24))
+        self.clear_button.setGeometry(QtCore.QRect(91, 400, 90, 24))
         self.clear_button.setObjectName("clear_button")
         self.add_input_button = QtWidgets.QPushButton(dialog)
-        self.add_input_button.setGeometry(QtCore.QRect(190, 400, 75, 24))
+        self.add_input_button.setGeometry(QtCore.QRect(187, 400, 90, 24))
         self.add_input_button.setObjectName("add_input_button")
         self.error_info_label = QtWidgets.QLabel(dialog)
         self.error_info_label.setGeometry(QtCore.QRect(10, 460, 351, 51))
@@ -120,7 +120,7 @@ class ui_dialog(object):
         self.error_info_label.setText("")
         self.error_info_label.setObjectName("error_info_label")
         self.generate_excel_button = QtWidgets.QPushButton(dialog)
-        self.generate_excel_button.setGeometry(QtCore.QRect(100, 430, 161, 24))
+        self.generate_excel_button.setGeometry(QtCore.QRect(85, 430, 200, 24))
         self.generate_excel_button.setObjectName("generate_excel_button")
 
         self.retranslateUi(dialog)
@@ -130,7 +130,7 @@ class ui_dialog(object):
     def retranslateUi(self, Dialog):
         _translate = QtCore.QCoreApplication.translate
         Dialog.setWindowTitle(_translate("Dialog", "Auto Excel"))
-        self.home_path = os.path.join(os.environ["HOMEPATH"], "Desktop")  # Get user desktop path
+        self.home_path = "/Users/prepress-2/Desktop"  # Static user desktop
         self.file_path_entry.setText(_translate("Dialog", self.home_path))
         self.directory_label.setText(_translate("Dialog", "Save Path:"))
         self.file_name_entry.setText(_translate("Dialog", "test.xlsx"))
@@ -201,9 +201,14 @@ class ui_dialog(object):
 
     # Removes selected item by index from list_of_executions and by same index from EXECUTION_LIST
     def remove_item(self):
-        index = self.list_of_executions.row(self.list_of_executions.selectedItems()[0])
+        try:
+            index = self.list_of_executions.row(self.list_of_executions.selectedItems()[0])
+        except IndexError:
+            self.error_info_label.setText("Error: No selection made!")
+            return
         self.list_of_executions.takeItem(self.list_of_executions.row(self.list_of_executions.selectedItems()[0]))
         EXECUTION_LIST.pop(index)
+        self.error_info_label.setText("")
 
     # Loops through EXECUTION_LIST, each item found increases column. For each given item, the item is repeated built as
     # many times as is specified by the min_max, increasing row each iteration
